@@ -5,7 +5,9 @@ try{cart=JSON.parse(localStorage.getItem('tw_cart')||'[]')}catch(e){}
 const saveCart=()=>{try{localStorage.setItem('tw_cart',JSON.stringify(cart))}catch(e){}};
 const R=n=>'₹'+Math.round(n).toLocaleString('en-IN');
 const P=id=>S.products.find(p=>p.id==id);
-const img=(p,c='pi')=>p.img?`<img class="${c}" src="${esc(p.img)}" alt="${esc(p.name)}">`:`<div class="ph">${esc(p.emoji||'🧩')}</div>`;
+const imgs=p=>p.imgs&&p.imgs.length?p.imgs:(p.img?[p.img]:[]);
+const img=(p,c='pi')=>{const s=imgs(p)[0];return s?`<img class="${c}" src="${esc(s)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="ph">${esc(p.emoji||'🧩')}</div>`};
+const gal=p=>{const L=imgs(p);if(!L.length)return `<div class="gal"><div class="ph" style="height:100%">${esc(p.emoji||'🧩')}</div></div>`;return `<div class="gal"><div class="sl" id="sl">${L.map(s=>`<img src="${esc(s)}" alt="">`).join('')}</div>${L.length>1?`<button class="ar l" data-a="sl" data-d="-1">‹</button><button class="ar r" data-a="sl" data-d="1">›</button><div class="dots" id="dots">${L.map((s,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}</div>`};
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
 function calc(){let sub=cart.reduce((a,i)=>a+i.price*i.qty,0),disc=0,c=V.coupon,fs=false;
  if(c){if(sub<c.min){V.coupon=null;c=null}else if(c.type=='pct')disc=sub*c.val/100;else if(c.type=='flat')disc=c.val;else fs=true}
@@ -21,11 +23,12 @@ function shop(){const cats=['All',...new Set(S.products.map(p=>p.cat))];
  <h2 class="t" id="shop">Shop</h2><div class="bar">${cats.map(c=>`<span class="chip ${c==V.cat?'on':''}" data-a="cat" data-c="${esc(c)}">${esc(c)}</span>`).join('')}<input id="sq" placeholder="Search products…" value="${esc(V.q)}"></div>
  <div class="grid">${list.map((p,i)=>`<div class="card ${p.stock?'':'soldout'}" data-a="open" data-id="${p.id}" style="animation-delay:${i*50}ms">${p.stock?(p.isNew?'<span class="tag">NEW</span>':''):'<span class="tag o">OUT OF STOCK</span>'}${img(p)}<div class="in"><h3>${esc(p.name)}</h3><div class="pr">${R(p.price)}${p.mrp>p.price?`<s>${R(p.mrp)}</s>`:''}</div></div></div>`).join('')||'<p style="color:var(--mu)">No products found.</p>'}</div></div>
  <footer><div class="wrap">© 2026 Twistelo · A <a href="https://twistandturn.co.in" target="_blank" rel="noopener">Twist &amp; Turn</a> store</div></footer>`;
- const q=$('#sq');if(q)q.oninput=e=>{V.q=e.target.value;const f=q.selectionStart;shop();const x=$('#sq');x.focus();x.setSelectionRange(f,f)}}
+ const q=$('#sq');$('#app').classList.toggle('na',!!V.noAnim);if(q)q.oninput=e=>{V.noAnim=true;V.q=e.target.value;const f=q.selectionStart;shop();const x=$('#sq');x.focus();x.setSelectionRange(f,f)}}
 function modal(id){const p=P(id);if(!p)return;const sel={};
- $('#ov').innerHTML=`<div class="ov" data-a="close"><div class="md">${img(p,'')}<div class="b"><h2 style="font:700 28px Rajdhani;margin:0">${esc(p.name)}</h2><div class="pr" style="font-size:20px;margin:4px 0">${R(p.price)}${p.mrp>p.price?`<s>${R(p.mrp)}</s>`:''}</div><p style="color:var(--mu)">${esc(p.desc)}</p>
+ $('#ov').innerHTML=`<div class="ov" data-a="close"><div class="md">${gal(p)}<div class="b"><h2 style="font:700 28px Rajdhani;margin:0">${esc(p.name)}</h2><div class="pr" style="font-size:20px;margin:4px 0">${R(p.price)}${p.mrp>p.price?`<s>${R(p.mrp)}</s>`:''}</div><p style="color:var(--mu)">${esc(p.desc)}</p>
  ${(p.opts||[]).map((o,i)=>`<div class="opt"><label>${esc(o.n)}</label><div class="pills">${o.v.map(v=>`<span class="pill" data-o="${i}" data-v="${esc(v)}">${esc(v)}</span>`).join('')}</div></div>`).join('')}
  <div id="me" class="err"></div><div style="display:flex;gap:10px;margin-top:14px"><button class="btn" id="add" ${p.stock?'':'disabled'}>${p.stock?'Add to Cart':'Out of Stock'}</button><button class="btn ghost" data-a="close">Close</button></div></div></div></div>`;
+ const sl=$('#sl');if(sl)sl.onscroll=()=>{const k=Math.round(sl.scrollLeft/sl.clientWidth);document.querySelectorAll('#dots i').forEach((d,j)=>d.classList.toggle('on',j==k))};
  $('#ov').onclick=e=>{const t=e.target.closest('.pill');if(t){sel[t.dataset.o]=t.dataset.v;document.querySelectorAll(`.pill[data-o="${t.dataset.o}"]`).forEach(x=>x.classList.toggle('on',x==t))}};
  $('#add').onclick=()=>{if((p.opts||[]).some((o,i)=>!sel[i])){$('#me').textContent='Please select '+p.opts.filter((o,i)=>!sel[i]).map(o=>o.n).join(' & ');return}
  const v=p.opts.map((o,i)=>o.n+': '+sel[i]).join(', ');const k=p.id+'|'+v;const ex=cart.find(i=>i.k==k);if(ex)ex.qty++;else cart.push({k,id:p.id,name:p.name,v,price:p.price,qty:1});saveCart();$('#ov').innerHTML='';shop();toast('Added to cart ✓')}}
@@ -48,6 +51,6 @@ document.addEventListener('click',async e=>{const t=e.target.closest('[data-a]')
  else if(a=='cart')drawer();else if(a=='back')drawer();else if(a=='co')drawer(2);else if(a=='wa')sendWA();
  else if(a=='inc'){cart[i].qty++;saveCart();drawer();shop()}else if(a=='dec'){cart[i].qty>1?cart[i].qty--:cart.splice(i,1);saveCart();drawer();shop()}else if(a=='rm'){cart.splice(i,1);saveCart();drawer();shop()}
  else if(a=='apply'){const c=S.coupons.find(x=>x.on&&x.code.toLowerCase()==g('cc').toLowerCase()),sub=calc().sub;if(!c){drawer();$('#cm').textContent='Invalid coupon code';return}if(sub<c.min){drawer();$('#cm').textContent='Minimum order '+R(c.min)+' required';return}V.coupon=c;drawer()}
- else if(a=='copy'){try{navigator.clipboard.writeText(t.dataset.c)}catch(x){}toast('Code copied: '+t.dataset.c)}});
+ else if(a=='sl'){const s=$('#sl');s.scrollBy({left:+t.dataset.d*s.clientWidth,behavior:'smooth'})}else if(a=='copy'){try{navigator.clipboard.writeText(t.dataset.c)}catch(x){}toast('Code copied: '+t.dataset.c)}});
 shop();
-loadData().then(d=>{if(d){S=d;shop()}});
+loadData().then(d=>{if(d){S=d;V.noAnim=true;shop()}});
