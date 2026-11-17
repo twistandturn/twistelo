@@ -72,3 +72,19 @@ body:has(#ov .ov){overflow:hidden}
 input,select,textarea{font-size:16px}.logo{font-size:23px}h2.t{font-size:26px}
 .md{max-height:94vh}.gal{aspect-ratio:1;min-height:0}.md .b{padding:16px}.perks{grid-template-columns:1fr}.offer{flex-basis:84%}.pn .fr{grid-template-columns:1fr 1fr}
 }
+
+/* v3: navbar, about, contact */
+.mn{display:flex;align-items:center;gap:4px}
+.mn a,.mn .dd>span{display:block;padding:8px 13px;border-radius:8px;cursor:pointer;color:var(--tx);font-weight:500;font-size:14px;text-decoration:none;outline:none}
+.mn a:hover,.mn .dd:hover>span,.mn a:focus-visible{background:var(--sf2)}
+.dd{position:relative}.dm{display:none;position:absolute;top:100%;left:0;min-width:210px;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:6px;box-shadow:0 14px 34px #000b}
+.dd:hover .dm,.dd:focus-within .dm{display:block}
+.nav{display:flex;gap:8px}.hb{display:none;place-items:center;font-size:18px}
+@media(max-width:820px){.hb{display:grid}.mn{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);border-bottom:1px solid var(--bd);flex-direction:column;align-items:stretch;padding:8px 14px 14px;max-height:75vh;overflow:auto}.mn.open{display:flex}.dm{display:block;position:static;border:0;box-shadow:none;background:none;padding:0 0 0 14px}.dd>span{color:var(--mu)!important}}
+a.perk{text-decoration:none;display:block;transition:.2s}a.perk:hover{border-color:var(--ac);transform:translateY(-3px)}
+.ab{display:flex;gap:20px;background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:22px;align-items:flex-start}
+.av{flex:none;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:40px;background:linear-gradient(135deg,var(--ac),var(--bl))}
+.ab h3{margin:0;font:700 26px Rajdhani}.role{color:var(--ac);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase}.ab p{color:var(--mu);white-space:pre-line;margin:10px 0 14px}.row2{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:640px){.ab{flex-direction:column;align-items:center;text-align:center}.row2{justify-content:center}}
+
+.av{width:116px;height:116px;overflow:hidden;border:3px solid var(--ac);background:var(--sf2)}.av img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block}
